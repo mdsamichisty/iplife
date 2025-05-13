@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Info</title>
+  <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #ededed;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        color: #2c3e50;
+        position: relative;
+      }
+
+      .container {
+        max-width: 600px;
+        position: relative;
+        width: 100%;
+      }
+
+      h1 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 12px 30px;
+        background-color: #ffffff49;
+        color: #048dc4;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .info-box {
+        margin-top: 30px;
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .info-box div {
+        font-size: 16px;
+        width: 100%;
+      }
+
+      .info-box div span {
+        font-weight: bold;
+      }
+
+      .loading {
+        position: absolute;
+        top: 50%;
+        opacity: 0;
+        pointer-events: none;
+        z-index: -1;
+        left: 50%;
+        transition: 0.5s;
+        transform: translate(-50%, -50%);
+      }
+
+    </style>
+  </style>
+</head>
+<body>
+
+    
+
+  <div class="container">
+    <h1>Device Information</h1>
+    <button id="loadInfoBtn">Get Device Info</button>
+
+    <div class="loading">
+            <img src="./load.gif" height="100" alt="loading">
+        </div>
+
+    <div id="infoContainer" class="info-box" style="display: none;">
+      <div><span>Device Name:</span> <span id="deviceNameInfo">Not yet fetched...</span></div>
+      <div><span>CPU:</span> <span id="cpuInfo">Not yet fetched...</span></div>
+      <div><span>RAM:</span> <span id="ramInfo">Not yet fetched...</span></div>
+      <div><span>Platform:</span> <span id="platformInfo">Not yet fetched...</span></div>
+      <div><span>GPU:</span> <span id="gpuInfo">Not yet fetched...</span></div>
+      <div><span>IPv4:</span> <span id="ipv4Info">Not yet fetched...</span></div>
+    </div>
+    
+  </div>
+
+  <script>
+    // Function to get GPU name using WebGL
+    function getGPUInfo() {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl");
+      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+      if (debugInfo) {
+        const gpuName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        return gpuName || "Unknown GPU";
+      }
+      return "GPU information unavailable";
+    }
+
+    // Fetch system information from the backend API
+    document.getElementById('loadInfoBtn').addEventListener('click', function() {
+        let loading = document.querySelector(".loading");
+        loading.style.opacity = "1";
+        loading.style.pointerEvents = 'auto';
+        loading.style.zIndex = "99";
+      fetch('http://localhost:3000/api/system-info')
+        .then(response => response.json())
+        .then(data => {
+            let loading = document.querySelector(".loading");
+        loading.style.opacity = "0";
+        loading.style.pointerEvents = 'none';
+        loading.style.zIndex = "-1";
+          document.getElementById('deviceNameInfo').textContent = data.deviceName;  // Show device name
+          document.getElementById('cpuInfo').textContent = data.cpu;
+          document.getElementById('ramInfo').textContent = data.ram;
+          document.getElementById('platformInfo').textContent = data.platform;
+          document.getElementById('gpuInfo').textContent = getGPUInfo();  // Fetch GPU info
+          document.getElementById('ipv4Info').textContent = data.ipv4;
+
+          // Show the info container
+          document.getElementById('infoContainer').style.display = 'block';
+        })
+        .catch(error => {
+          console.error('Error fetching system info:', error);
+        });
+    });
+  </script>
+
+</body>
+</html>
