@@ -118,7 +118,7 @@
         loading.style.opacity = "1";
         loading.style.pointerEvents = 'auto';
         loading.style.zIndex = "99";
-      fetch('http://localhost:3000/api/system-info')
+      fetch('https://iplife.onrender.com/api/system-info')
         .then(response => response.json())
         .then(data => {
             let loading = document.querySelector(".loading");
